@@ -5,6 +5,13 @@
 Websocket client that streams data of all strikes contract 
 for requested option symbol 
 """
+# Fix for pickle issue.
+import platform
+if platform.system() != "Linux":
+    from multiprocessing import set_start_method
+    set_start_method("fork")
+
+
 
 import logging, time
 from multiprocessing import Process, Queue
@@ -44,7 +51,7 @@ class WebsocketClient:
                                     'last_price':tick['last_price'], 'change':tick['change']}
             else:
                 optionData = {'token':tick['instrument_token'], 'symbol':contract_detail['symbol'], 
-                                    'last_price':tick['last_price'], 'volume':tick['volume'], 'change':tick['change'],
+                                    'last_price':tick['last_price'], 'volume':tick.get('volume_traded'), 'change':tick['change'],
                                     'oi':tick['oi']}
 
             # Store each tick to redis with symbol and token as key pair
